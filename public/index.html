@@ -147,7 +147,7 @@ body.light{
 .checked-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;padding:0 .25rem}
 .checked-header span{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3)}
 .checked-header button{font-size:.72rem;color:var(--red);font-weight:600;transition:.15s}
-.checked-header button:hover{color:var(--text)}
+.checked-header button:hover{color:var(--text)}h
 .done-name{text-decoration:line-through;color:var(--text3)}
 
 /* ─── Settings ─── */
@@ -278,7 +278,9 @@ body.light{
 <div id="app"></div>
 <script>
 /* ═══════ State ═══════ */
-const S={screen:'welcome',dark:true,tab:'expenses',user:'',partner:'',expenses:[],items:[],modal:null};
+const _saved=JSON.parse(localStorage.getItem('splitschatzi')||'null');
+const S=_saved?{..._saved,modal:null,tab:_saved.tab||'expenses'}:{screen:'welcome',dark:true,tab:'expenses',user:'',partner:'',expenses:[],items:[],modal:null};
+function save(){localStorage.setItem('splitschatzi',JSON.stringify({screen:S.screen,dark:S.dark,tab:S.tab,user:S.user,partner:S.partner,expenses:S.expenses,items:S.items}))}
 
 const SHOP_CATS=[
   {id:'fruits',name:'Obst & Gem\u00fcse',emoji:'\u{1F34E}'},
@@ -349,6 +351,7 @@ function getPartnerPaid(){return S.expenses.filter(e=>e.paidBy==='partner').redu
 
 /* ═══════ Render ═══════ */
 function R(){
+  save();
   const a=document.getElementById('app');
   if(S.dark)document.body.classList.remove('light');else document.body.classList.add('light');
   if(S.screen==='welcome'){a.innerHTML=rWelcome();bWelcome()}
@@ -532,7 +535,7 @@ function bMain(){
   document.querySelectorAll('[data-tog]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.tog;S.items=S.items.map(i=>i.id===id?{...i,checked:!i.checked}:i);R()}));
   document.querySelectorAll('[data-deli]').forEach(b=>b.addEventListener('click',()=>{S.items=S.items.filter(i=>i.id!==b.dataset.deli);R()}));
   document.getElementById('clr-ch')?.addEventListener('click',()=>{S.items=S.items.filter(i=>!i.checked);R()});
-  document.getElementById('s-clr')?.addEventListener('click',()=>{if(confirm('Alle Daten l\u00f6schen?')){S.expenses=[];S.items=[];R()}});
+  document.getElementById('s-clr')?.addEventListener('click',()=>{if(confirm('Alle Daten l\u00f6schen?')){S.expenses=[];S.items=[];S.user='';S.partner='';S.screen='welcome';localStorage.removeItem('splitschatzi');R()}});
   document.getElementById('s-back')?.addEventListener('click',()=>{S.screen='welcome';R()});
   document.getElementById('m-ov')?.addEventListener('click',e=>{if(e.target.id==='m-ov'){S.modal=null;R()}});
   document.getElementById('m-cl')?.addEventListener('click',()=>{S.modal=null;R()});
