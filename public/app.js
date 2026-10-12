@@ -755,7 +755,7 @@ document.addEventListener('click',e=>{
     case'finish-shop':finishShopping();break;
     case'invite':invite();break;
     case'copy-code':copyText(L.room).then(()=>toast('Code '+esc(L.room)+' kopiert'));break;
-    case'install':if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;update()})}break;
+    case'install':if(installEvt){installEvt.prompt();installEvt.userChoice.then(()=>{installEvt=null;update()},()=>{})}break;
     case'hide-install':L.hideInstall=true;saveL();update();break;
     case'theme':L.theme=t.dataset.v;saveL();applyTheme();update();break;
     case'rename':rename();break;
@@ -776,7 +776,8 @@ document.addEventListener('change',e=>{
   if(e.target.id!=='ratio')return;
   const v=+e.target.value;upd({'settings/p1Pct':me()==='person1'?v:100-v});
 });
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(L.theme==='auto')applyTheme()});
+{const mq=matchMedia('(prefers-color-scheme: dark)'),fn=()=>{if(L.theme==='auto')applyTheme()};
+ mq.addEventListener?mq.addEventListener('change',fn):mq.addListener&&mq.addListener(fn)} // iOS < 14 kennt nur addListener
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){db.goOnline&&db.goOnline();if(S.screen==='main')update()}});
 
 /* ======= Init ======= */

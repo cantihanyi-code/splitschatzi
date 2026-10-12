@@ -1,7 +1,7 @@
-/* SplitSchatzi Service Worker
+﻿/* SplitSchatzi Service Worker
    App-Dateien: network-first (immer aktuell, wenn online) mit Cache-Fallback -> App startet auch offline.
    Die Daten selbst laufen über die Firebase-Websocket-Verbindung und werden hier nicht angefasst. */
-const CACHE = 'splitschatzi-v2';
+const CACHE = 'splitschatzi-v3';
 const FONTS = 'splitschatzi-fonts';
 const SHELL = ['/', '/index.html', '/app.js', '/styles.css', '/manifest.webmanifest',
   '/icons/icon.svg', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
@@ -34,15 +34,15 @@ self.addEventListener('fetch', e => {
 async function networkFirst(req) {
   const cache = await caches.open(CACHE);
   const key = req.mode === 'navigate' ? '/index.html' : req;
-  try {
-    const res = await Promise.race([fetch(req), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000))]);
-    if (res.ok) cache.put(key, res.clone());
+  const hit = await cache.match(key, { ignoreSearch: true });
+  const net = fetch(req).then(res => {
+    if (res.ok && !res.redirected) cache.put(key, res.clone());
     return res;
-  } catch (err) {
-    const hit = await cache.match(key, { ignoreSearch: true });
-    if (hit) return hit;
-    throw err;
-  }
+  });
+  // Nur wenn eine gespeicherte Kopie da ist, bei langsamem Netz nach 4 s darauf ausweichen –
+  // sonst geduldig auf das Netz warten (langsames LTE darf nie zu einer Fehlerseite führen).
+  if (!hit) return net.catch(() => fetch(req));
+  return Promise.race([net, new Promise(r => setTimeout(() => r(hit), 4000))]).catch(() => hit);
 }
 
 async function cacheFirst(req) {
