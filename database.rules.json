@@ -2,8 +2,27 @@
   "rules": {
     "rooms": {
       "$roomId": {
-        ".read": true,
-        ".write": true
+        ".read": "$roomId.length >= 4 && $roomId.length <= 12",
+        ".write": "$roomId.length >= 4 && $roomId.length <= 12",
+        "person1": { ".validate": "newData.isString() && newData.val().length <= 30" },
+        "person2": { ".validate": "newData.isString() && newData.val().length <= 30" },
+        "expenses": {
+          "$id": {
+            ".validate": "newData.hasChildren(['amount', 'paidBy']) && newData.child('amount').isNumber() && newData.child('amount').val() >= 0 && newData.child('amount').val() < 1000000 && (newData.child('paidBy').val() === 'person1' || newData.child('paidBy').val() === 'person2')"
+          }
+        },
+        "items": {
+          "$id": {
+            ".validate": "newData.hasChild('name') && newData.child('name').isString() && newData.child('name').val().length <= 100"
+          }
+        },
+        "history": {
+          "$key": { ".validate": "newData.hasChild('name')" }
+        },
+        "settings": {
+          "p1Pct": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" }
+        },
+        "$other": { ".validate": false }
       }
     }
   }

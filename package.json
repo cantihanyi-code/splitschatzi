@@ -1,0 +1,11 @@
+{
+  "name": "splitschatzi",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Gemeinsame Einkaufsliste und Ausgaben-Split für zwei – als installierbare Web-App (PWA) mit Firebase-Echtzeit-Sync.",
+  "scripts": {
+    "dev": "node dev/server.mjs",
+    "icons": "node dev/make-icons.mjs",
+    "deploy": "npx -y firebase-tools@latest deploy --only hosting,database"
+  }
+}
